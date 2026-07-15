@@ -1,45 +1,25 @@
 const db = require('../config/db.js');
 
-exports.createUser = (name, email, password, callback) => {
+exports.createUser = async (name, email, password) => {
     const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-    db.query(sql, [name, email, password], (err, result) => {
-        if (err) {
-            return callback(err);
-        }
-        callback(null);
-    });
+    const [result] = await db.promise().execute(sql, [name, email, password]);
+    return result;
 };
 
-exports.getUserByEmail = (email, callback) => {
+exports.getUserByEmail = async (email) => {
     const sql = `SELECT * FROM users WHERE email = ?`;
-    db.query(sql, [email], (err, users) => {
-        if (err) {
-            return callback(err);
-        }
-        if (users.length === 0) {
-            return callback(null, null); // Retorna null se nenhum usuário for encontrado
-        }
-        callback(null, users[0]); // Retorna o primeiro usuário encontrado
-    });
+    const [users] = await db.promise().execute(sql, [email]);
+    return users[0] || null;
 };
 
-
-exports.getUserById = (id, callback) => {
+exports.getUserById = async (id) => {
     const sql = `SELECT * FROM users WHERE id = ?`;
-    db.query(sql, [id], (err, user) => {
-        if (err) {
-            return callback(err);
-        }
-        callback(null, user[0]);
-    });
+    const [users] = await db.promise().execute(sql, [id]);
+    return users[0] || null;
 };
 
-exports.getAllUsers = (callback) => {
-    const sql = `SELECT * FROM users`;
-    db.query(sql, (err, users) => {
-        if (err) {
-            return callback(err);
-        }
-        callback(null, users);
-    });
+exports.getAllUsers = async () => {
+    const sql = `SELECT id, name, email FROM users`;
+    const [users] = await db.promise().query(sql);
+    return users;
 };
